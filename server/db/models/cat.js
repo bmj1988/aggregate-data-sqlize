@@ -12,11 +12,14 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Cat.belongsToMany(
-        models.Toy, 
-        { through: models.CatToy }
+        models.Toy,
+        { through: models.CatToy,
+          foreignKey: 'catId',
+          otherKey: 'toyId'
+        }
       );
       Cat.hasMany(
-        models.CatToy, 
+        models.CatToy,
       );
     }
   };
