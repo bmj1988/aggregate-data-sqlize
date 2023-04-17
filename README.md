@@ -23,6 +23,8 @@ Explore the models and their associations in the __db/models__ directory. The
 `Cat` and `Toy` models have a many-to-many relationship, and are joined by the
 `CatToy` model.
 
+`cd` into the __server__ folder.
+
 Start your development server using `npm run dev`.
 
 In this practice you will be implementing the endpoints in __app.js__ which will
