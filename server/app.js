@@ -8,7 +8,7 @@ require('express-async-errors');
 
 
 // Import the models used in these routes - DO NOT MODIFY
-const { Cat, Toy, sequelize } = require('./db/models');
+const { Cat, Toy, sequelize, Sequelize } = require('./db/models');
 const { Op } = require("sequelize");
 
 
@@ -23,22 +23,25 @@ app.get('/toys', async (req, res, next) => {
 
     // A. Create an `allToys` variable that returns all toys
     // Your code here
+    const allToys = await Toy.findAll()
 
     // B. Create a `toysCount` variable that returns the total number of toy
     // records
     // Your code here
-    
+    const toysCount = await Toy.count()
+
     // C. Create a `toysMinPrice` variable that returns the minimum price of all
     // the toys
     // Your code here
-    
+    const toysMinPrice = await Toy.min('price')
     // D. Create a `toysMaxPrice` variable that returns the maximum price of all
     // the toys
     // Your code here
-
+    const toysMaxPrice = await Toy.max('price')
     // E. Create a `toysSumPrice` variable that returns the sum of all of
     // the toy prices.
     // Your code here
+    const toysSumPrice = await Toy.sum('price')
 
     res.json({
         toysCount,
@@ -60,15 +63,15 @@ app.get('/cats/:id/toys', async (req, res, next) => {
             model: Toy,
             attributes: []
         },
-        attributes: [
+        attributes: [[Sequelize.fn('COUNT', Sequelize.col('Toys.id')), 'toyCount'],
             // Count all of this cat's toys, and display the value with a
             // key of `toyCount`
             // Your code here
-
+        [Sequelize.fn('AVG', Sequelize.col('Toys.price')), 'averageToyPrice'],
             // Find the average price of this cat's toys, and display the
             // value with a key of `averageToyPrice`
             // Your code here
-
+        [Sequelize.fn('SUM', Sequelize.col('Toys.price')), 'totalToyPrice']
             // Find the total price of this cat's toys, and display the
             // value with a key of `totalToyPrice`
             // Your code here
@@ -79,11 +82,17 @@ app.get('/cats/:id/toys', async (req, res, next) => {
     const cat = await Cat.findByPk(req.params.id, {
         include: { model: Toy }
     });
-    
+
+    const catData = cat.toJSON()
+    const {toyCount, averageToyPrice, totalToyPrice } = catToysAggregateData
+    catData.toyCount = toyCount
+    catData.averageToyPrice = averageToyPrice
+    catData.totalToyPrice = totalToyPrice
+
 
     // STEP 2b: Format the cat object to add the aggregate keys and values to it
 
-    // Define a new variable, `catData`, and set it equal to the `cat` variable converted to JSON 
+    // Define a new variable, `catData`, and set it equal to the `cat` variable converted to JSON
     // Your code here
 
     // Add the `toyCount`, `averageToyPrice`, and `totalToyPrice` keys to the
@@ -93,7 +102,7 @@ app.get('/cats/:id/toys', async (req, res, next) => {
 
     // After the steps above are complete, refactor the line below to only
     // display `catData`
-    res.json({ catToysAggregateData, cat });
+    res.json({catData });
 })
 
 
